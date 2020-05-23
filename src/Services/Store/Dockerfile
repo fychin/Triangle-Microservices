@@ -5,7 +5,7 @@ ENV FLASK_APP=store.py FLASK_RUN_PORT=8000
 
 WORKDIR /app
 
-COPY ../../requirements.txt ${WORKDIR}
+COPY requirements.txt ${WORKDIR}
 COPY store.py ${WORKDIR}
 
 RUN pip install -r requirements.txt
