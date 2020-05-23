@@ -1,0 +1,10 @@
+version: '0.1'
+services:
+    store:
+        build: ./Store
+        ports:
+            - "8080:8000"
+    inventory:
+        build: ./Inventory
+        ports:
+            - "8082:8000"
