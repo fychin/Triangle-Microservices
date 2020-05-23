@@ -24,6 +24,13 @@ stores = [
     }
 ]
 
+@app.route('/', methods=['GET'])
+@app.route('/health', methods=['GET'])
+def health_check():
+    health = {'status': 'healthy'}
+    return jsonify(health)
+
+
 @app.route('/store', methods=['GET'])
 def get_stores():
     return jsonify({'stores': stores, 'total': len(stores)})

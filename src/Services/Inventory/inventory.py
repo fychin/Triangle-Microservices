@@ -21,6 +21,13 @@ inventory = [
     }
 ]
 
+@app.route('/', methods=['GET'])
+@app.route('/health', methods=['GET'])
+def health_check():
+    health = {'status': 'healthy'}
+    return jsonify(health)
+
+
 @app.route('/inventory', methods=['GET'])
 def get_inventory_list():
     return jsonify({'inventory': inventory, 'total': len(inventory)})
