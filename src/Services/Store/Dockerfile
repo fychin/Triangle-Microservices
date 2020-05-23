@@ -10,6 +10,6 @@ COPY store.py ${WORKDIR}
 
 RUN pip install -r requirements.txt
 
-ENTRYPOINT [ "flask", "run" ]
+ENTRYPOINT [ "flask", "run", "--host=0.0.0.0" ]
 
 EXPOSE ${FLASK_RUN_PORT}
