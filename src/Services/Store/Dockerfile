@@ -1,12 +1,11 @@
 FROM python:3.8.3-slim
 
 ENV PYTHONUNBUFFERED 1
-ENV FLASK_APP=store.py FLASK_RUN_PORT=8000
+ENV FLASK_APP=app/store.py FLASK_RUN_PORT=8000
 
-WORKDIR /app
-
-COPY requirements.txt ${WORKDIR}
-COPY store.py ${WORKDIR}
+COPY requirements.txt .
+COPY config.py .
+COPY app/ app/
 
 RUN pip install -r requirements.txt
 
