@@ -1,7 +1,8 @@
 from flask import Flask, jsonify, request
-from flask_restful import reqparse, abort, Resource, Api
+from flask_restful import reqparse, abort, fields, marshal_with, Resource, Api
 from werkzeug.exceptions import NotFound
 from app import app, db
+from app.models import Store
 
 api = Api(app)
 
@@ -26,9 +27,11 @@ stores = [
     }
 ]
 
-def abort_if_store_not_found(store_id):
-    if store_id not in range(1, len(stores)+1):
+def get_store_or_abort_if_not_found(store_id):
+    store_result = Store.query.get(store_id)
+    if store_result is None:
         abort(404, message='Store {} does not exist'.format(store_id))
+    return store_result
 
 # Request arguments
 parser = reqparse.RequestParser()
@@ -36,9 +39,20 @@ parser.add_argument('name', type=str)
 parser.add_argument('address', type=str)
 parser.add_argument('country', type=str)
 
-class StoreList(Resource):
+# Marshall model for response
+store_fields = {
+    'id': fields.Integer,
+    'name': fields.String,
+    'address': fields.String,
+    'country': fields.String,
+}
+
+class StoreListResource(Resource):
+    @marshal_with(store_fields)
     def get(self):
-        return {'stores': stores, 'total': len(stores)}
+        stores_list = Store.query.all()
+        total_count = Store.query.count()
+        return stores_list
     
     def post(self):
         request.get_json(force=True)
@@ -53,16 +67,15 @@ class StoreList(Resource):
         return stores[len(stores)-1], 201
 
 
-class Store(Resource):
+class StoreResource(Resource):
+    @marshal_with(store_fields)
     def get(self, store_id):
-        abort_if_store_not_found(store_id)
-        index = store_id - 1
-        return stores[index]
+        return get_store_or_abort_if_not_found(store_id)
 
     def delete(self, store_id):
-        abort_if_store_not_found(store_id)
-        index = store_id - 1
-        del stores[index]
+        get_store_or_abort_if_not_found(store_id)
+        Store.query.filter_by(id=store_id).delete()
+        db.session.commit()
         return '', 204
 
     def put(self, store_id):
@@ -83,13 +96,16 @@ class Store(Resource):
 @app.route('/', methods=['GET'])
 @app.route('/health', methods=['GET'])
 def health_check():
-    health = {'status': 'healthy'}
+    health = {
+        'service': 'Store',
+        'status': 'healthy'
+    }
     return jsonify(health)
 
 
 # Add api resource routing
-api.add_resource(StoreList, '/store')
-api.add_resource(Store, '/store/<int:store_id>')
+api.add_resource(StoreListResource, '/store')
+api.add_resource(StoreResource, '/store/<int:store_id>')
 
 
 if __name__ == '__main__':
