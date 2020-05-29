@@ -1,9 +1,10 @@
 from flask import Flask, jsonify, request
 from flask_restful import reqparse, abort, fields, marshal_with, Resource, Api
 from werkzeug.exceptions import NotFound
-from app import app, db
+from app import db, create_app
 from app.models import Store
 
+app = create_app()
 api = Api(app)
 
 stores = [

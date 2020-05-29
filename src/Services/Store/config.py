@@ -12,4 +12,5 @@ class Config(object):
 
 class TestingConfig(Config):
     TESTING = True
+    SQLALCHEMY_DATABASE_URI = 'sqlite:///test.db'
 
