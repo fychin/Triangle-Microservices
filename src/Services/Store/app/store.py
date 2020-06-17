@@ -1,10 +1,11 @@
-from flask import Flask, jsonify, request
+from flask import jsonify, request
 from flask_restful import reqparse, abort, fields, marshal_with, Resource, Api
-from werkzeug.exceptions import NotFound
 from app import db, create_app
 from app.models import Store
+import os
 
-app = create_app()
+config_name = os.getenv('APP_ENV')
+app = create_app(config_name)
 api = Api(app)
 
 stores = [
@@ -34,6 +35,7 @@ def get_store_or_abort_if_not_found(store_id):
         abort(404, message='Store {} does not exist'.format(store_id))
     return store_result
 
+
 # Request arguments
 parser = reqparse.RequestParser()
 parser.add_argument('name', type=str)
@@ -48,13 +50,14 @@ store_fields = {
     'country': fields.String,
 }
 
+
 class StoreListResource(Resource):
     @marshal_with(store_fields)
     def get(self):
         stores_list = Store.query.all()
         total_count = Store.query.count()
         return stores_list
-    
+
     def post(self):
         request.get_json(force=True)
         args = parser.parse_args()
@@ -111,4 +114,3 @@ api.add_resource(StoreResource, '/store/<int:store_id>')
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=8080)
-

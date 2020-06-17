@@ -1,7 +1,8 @@
 import unittest
-from config import TestingConfig
-from app import db, create_app
+from app import db
 from app.models import Store
+from app.store import app
+
 
 class StoreTest(unittest.TestCase):
     """Store service RestAPI test cases"""
@@ -9,31 +10,39 @@ class StoreTest(unittest.TestCase):
     def _init_db(self):
         """Seed db with test data"""
         store_1 = Store(name='flagship-SG',
-                address='Woodlands',
-                country='Singapore')
+                        address='Woodlands',
+                        country='Singapore')
         store_2 = Store(name='J-Square',
-                address='MacPherson',
-                country='Singapore')
+                        address='MacPherson',
+                        country='Singapore')
         store_3 = Store(name='Causeway Mall',
-                address='Johore Bahru',
-                country='Malaysia')
+                        address='Johore Bahru',
+                        country='Malaysia')
         db.session.bulk_save_objects([store_1, store_2, store_3])
         db.session.commit()
 
     def setUp(self):
         """Define test variables and initialize db"""
-        self.app = create_app(TestingConfig)
+        self.app = app
         self.client = self.app.test_client
 
         with self.app.app_context():
             db.create_all()
             self._init_db()
 
+    def test_api_health_check(self):
+        """Test service health-check (GET request)"""
+        res = self.client().get('/')
+        self.assertEqual(res.status_code, 200)
+        data = res.get_json()
+        self.assertEqual(data, {"service": "Store", "status": "healthy"})
+
     def test_api_get_store_list(self):
         """Test API get list of store (GET request)"""
-        res = self.client().get('/store')
-        self.assertEqual(res.status_code, 300)
-        self.assertEqual(len(res.data), 3)
+        res = self.client().get('store')
+        self.assertEqual(res.status_code, 200)
+        data = res.get_json()
+        self.assertEqual(len(data), 3)
 
     def test_api_get_store_by_id(self):
         """Test API get single store by id (GET request)"""
