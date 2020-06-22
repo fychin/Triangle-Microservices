@@ -18,7 +18,8 @@ class StoreTest(unittest.TestCase):
         store_3 = Store(name='Causeway Mall',
                         address='Johore Bahru',
                         country='Malaysia')
-        db.session.bulk_save_objects([store_1, store_2, store_3])
+        self.existing_stores_list = [store_1, store_2, store_3]
+        db.session.bulk_save_objects(self.existing_stores_list)
         db.session.commit()
 
     def setUp(self):
@@ -35,7 +36,7 @@ class StoreTest(unittest.TestCase):
         res = self.client().get('/')
         self.assertEqual(res.status_code, 200)
         data = res.get_json()
-        self.assertEqual(data, {"service": "Store", "status": "healthy"})
+        self.assertDictEqual(data, {"service": "Store", "status": "healthy"})
 
     def test_api_get_store_list(self):
         """Test API get list of store (GET request)"""
@@ -46,19 +47,53 @@ class StoreTest(unittest.TestCase):
 
     def test_api_get_store_by_id(self):
         """Test API get single store by id (GET request)"""
-        pass
+        res = self.client().get('store/2')
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(res.content_type, 'application/json')
+        data = res.get_json()
+        self.assertDictEqual({
+            'id': 2,
+            'name': 'J-Square',
+            'address': 'MacPherson',
+            'country': 'Singapore'
+        }, data)
 
     def test_api_create_new_store(self):
         """Test API create a store (POST request)"""
-        pass
+        res = self.client().post('store', json={
+            'name': 'New-Store',
+            'address': '5-11 Madison Ave',
+            'country': 'United States'
+        })
+        self.assertEqual(res.status_code, 201)
+        data = res.get_json()
+        self.assertDictEqual({
+            'id': 4,
+            'name': 'New-Store',
+            'address': '5-11 Madison Ave',
+            'country': 'United States'
+        }, data)
 
     def test_api_edit_store(self):
         """Test API modify an existing store (PUT request)"""
-        pass
+        res = self.client().put('store/4', json={
+            'name': 'California Flagship',
+            'address': '3 Genesee Ave, La Jolla, San Diego',
+            'country': 'United States'
+        })
+        self.assertEqual(res.status_code, 201)
+        data = res.get_json()
+        self.assertDictEqual({
+            'id': 4,
+            'name': 'California Flagship',
+            'address': '3 Genesee Ave, La Jolla, San Diego',
+            'country': 'United States'
+        }, data)
 
     def test_api_delete_store(self):
         """Test API remove an existing store (PUT request)"""
-        pass
+        res = self.client().delete('store/3')
+        self.assertEqual(res.status_code, 204)
 
     def tearDown(self):
         """Clean up db session and variables"""
