@@ -8,26 +8,6 @@ config_name = os.getenv('APP_ENV')
 app = create_app(config_name)
 api = Api(app)
 
-stores = [
-    {
-        'id': 1,
-        'name': 'flagship-SG',
-        'address': 'Woodlands',
-        'country': 'Singapore'
-    },
-    {
-        'id': 2,
-        'name': 'J-Square',
-        'address': 'MacPherson',
-        'country': 'Singapore'
-    },
-    {
-        'id': 3,
-        'name': 'Causeway Mall',
-        'address': 'Johore Bahru',
-        'country': 'Malaysia'
-    }
-]
 
 def get_store_or_abort_if_not_found(store_id):
     store_result = Store.query.get(store_id)
@@ -55,20 +35,17 @@ class StoreListResource(Resource):
     @marshal_with(store_fields)
     def get(self):
         stores_list = Store.query.all()
-        total_count = Store.query.count()
         return stores_list
 
     def post(self):
         request.get_json(force=True)
         args = parser.parse_args()
-        new_store = {
-            'id': len(stores)+1,
-            'name': args['name'],
-            'address': args['address'],
-            'country': args['country'],
-        }
-        stores.append(new_store)
-        return stores[len(stores)-1], 201
+        new_store = Store(name=args['name'],
+                          address=args['address'],
+                          country=args['country'])
+        db.session.add(new_store)
+        db.session.commit()
+        return get_store_or_abort_if_not_found(new_store.id).serialize(), 201
 
 
 class StoreResource(Resource):
@@ -85,15 +62,12 @@ class StoreResource(Resource):
     def put(self, store_id):
         request.get_json(force=True)
         args = parser.parse_args()
-        updated_store = {
-            'id': store_id,
-            'name': args['name'],
-            'address': args['address'],
-            'country': args['country'],
-        }
-        index = store_id - 1
-        stores[index] = updated_store
-        return updated_store, 201
+        update_store = get_store_or_abort_if_not_found(store_id)
+        update_store.name = args['name']
+        update_store.address = args['address']
+        update_store.country = args['country']
+        db.session.commit()
+        return update_store.serialize(), 201
 
 
 # Health-check endpoint

@@ -76,15 +76,16 @@ class StoreTest(unittest.TestCase):
 
     def test_api_edit_store(self):
         """Test API modify an existing store (PUT request)"""
-        res = self.client().put('store/4', json={
+        put_res = self.client().put('store/1', json={
             'name': 'California Flagship',
             'address': '3 Genesee Ave, La Jolla, San Diego',
             'country': 'United States'
         })
-        self.assertEqual(res.status_code, 201)
-        data = res.get_json()
+        self.assertEqual(put_res.status_code, 201)
+        get_res = self.client().get('store/1')
+        data = get_res.get_json()
         self.assertDictEqual({
-            'id': 4,
+            'id': 1,
             'name': 'California Flagship',
             'address': '3 Genesee Ave, La Jolla, San Diego',
             'country': 'United States'
@@ -92,8 +93,11 @@ class StoreTest(unittest.TestCase):
 
     def test_api_delete_store(self):
         """Test API remove an existing store (PUT request)"""
-        res = self.client().delete('store/3')
-        self.assertEqual(res.status_code, 204)
+        delete_res = self.client().delete('store/3')
+        self.assertEqual(delete_res.status_code, 204)
+        query_res = self.client().get('store/3')
+        self.assertEqual(query_res.status_code, 404)
+
 
     def tearDown(self):
         """Clean up db session and variables"""

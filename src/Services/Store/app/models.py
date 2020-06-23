@@ -1,5 +1,6 @@
 from app import db
 
+
 class Store(db.Model):
     __tablename__ = 'store'
 
@@ -23,5 +24,3 @@ class Store(db.Model):
             'address': self.address,
             'country': self.country
         }
-
- 
