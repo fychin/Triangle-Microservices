@@ -10,7 +10,7 @@ migrate = Migrate()
 def create_app(config_type):
     # Init Flask app with config
     app = Flask(__name__)
-    app.config.from_object(app_config['testing'])
+    app.config.from_object(app_config[config_type])
 
     # Configure db
     db.init_app(app)
