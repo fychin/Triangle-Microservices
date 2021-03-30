@@ -4,7 +4,7 @@ asgiref==3.2.7
 astroid==2.4.1
 click==7.1.2
 colorama==0.4.3
-Django==3.0.7
+Django==3.0.12
 djangorestframework==3.11.0
 Flask==1.1.2
 Flask-Migrate==2.5.3
